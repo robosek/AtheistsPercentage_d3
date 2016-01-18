@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <link rel="stylesheet" href="style.css"/>
+        <link rel="stylesheet" href="d3.slider.css"/>
+        <script src="d3.js" charset="utf-8"></script>
+        <script src="d3.slider.js" charset="utf-8"></script>
+    </head>
+    <body>
+        <div id="wrapper">
+        <h2>Global number of atheists among religions over time on the world</h2>
+        <br>
+        <br>
+    <script>
+            
+            var width = 900;
+            var height = 500;
+            var padding = 40;
+            var minDate;
+            var maxDate;
+            
+            function getMinDate(ds){
+                return getDate(ds[0].year)
+            }
+            function getMaxDate(ds){
+                return getDate(ds[ds.length-1].year)
+            }
+            
+            function buildLine(minDate,maxDate,ds) {
+                
+            var tooltip = d3.select("#wrapper").append("div")   
+                        .attr("class", "tooltip")               
+                        .style("opacity", 0);
+            var xScale = d3.time.scale()
+                        .domain([minDate, maxDate])                
+                        .range([padding+5, width-padding]);
+            var yScale = d3.scale.linear()
+                        .domain([d3.min(ds, function(d){ return d.nonreligpct;}), d3.max(ds, function(d){ return d.nonreligpct;})])
+                        .range([height-padding,d3.min(ds, function(d){ return d.nonreligpct;})])
+                        .nice();
+            var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(d3.time.format("%Y"));
+            var yAxisGen = d3.svg.axis().scale(yScale).orient("left").ticks(6);
+            var lineFun = d3.svg.line() 
+                .x(function (d) {return xScale(getDate(d.year)); } )
+                .y(function (d) {return yScale(d.nonreligpct); })
+                .interpolate("linear");
+            var svg = d3.select("#wrapper").append("svg").attr({ width:width, height:height, "id":"svg-main"});
+            var yAxis = svg.append("g").call(yAxisGen)
+                        .attr("class", "y-axis")
+                        .attr("transform", "translate(" + padding + ", 5)");
+            var xAxis = svg.append("g").call(xAxisGen)
+                        .attr("class","x-axis")
+                        .attr("transform", "translate(0," + (height-padding) + ")");
+            var viz = svg.append("path")
+                        .attr({
+                            d: lineFun(ds),
+                            "stroke" : "purple",
+                            "stroke-width": 2,
+                            "fill" : "none",
+                            "class":"path-main"
+                        });
+             var dots = svg.selectAll("circle")                            
+                            .data(ds)
+                            .enter()
+                            .append("circle")
+                            .attr({
+                                cx: function(d) {return xScale(getDate(d.year)); },
+                                cy: function (d) {return yScale(d.nonreligpct); },
+                                r:  4,
+                                "fill": "purple",                                
+                                class: "circle"
+                            }) 
+                            .on("mouseover", function(d) {      
+                                tooltip.transition()        
+                                    .duration(500)      
+                                    .style("opacity", .9);      
+                                tooltip.html("<strong>About " + (d.nonreligpct *100).toFixed(2) + "% of atheists on the world in "+d.year+" year.</strong>")  
+                                    .style("left", (d3.event.pageX) + "px")     
+                                    .style("top", (d3.event.pageY - 28) + "px");    
+                            })                  
+                            .on("mouseout", function(d) {       
+                                tooltip.transition()        
+                                    .duration(500)      
+                                    .style("opacity", 0);   
+                            });
+
+        }
+        
+        function updateLine(minDate,maxDate,ds){
+             var tooltip = d3.select("#wrapper").select(".tooltip");
+            var xScale = d3.time.scale()
+                        .domain([minDate, maxDate])                
+                        .range([padding+5, width-padding])
+            var yScale = d3.scale.linear()
+                        .domain([d3.min(ds, function(d){ return d.nonreligpct;}), d3.max(ds, function(d){ return d.nonreligpct;})])
+                        .range([height-padding,d3.min(ds, function(d){ return d.nonreligpct;})])
+                        .nice();
+            var xAxisGen = d3.svg.axis().scale(xScale).orient("bottom").tickFormat(d3.time.format("%Y")).ticks(ds.length-1);;
+            var yAxisGen = d3.svg.axis().scale(yScale).orient("left").ticks(5);
+            var lineFun = d3.svg.line() 
+                .x(function (d) {return xScale(getDate(d.year)); } )
+                .y(function (d) {return yScale(d.nonreligpct); })
+                .interpolate("linear");
+            var svg = d3.select("#wrapper").select("#svg-main");
+            svg.selectAll("circle").remove();
+            var yAxis = svg.selectAll("g.y-axis").call(yAxisGen)                        
+            var xAxis = svg.selectAll("g.x-axis").call(xAxisGen)                        
+            var viz = svg.selectAll(".path-main") 
+                    .transition() //add the transition and you're done!
+                    .duration(200) //set the duration for more control
+                    .ease("linear") //choose the type of animation linear, elastic, bounce, circle
+                    .attr({
+                        d: lineFun(ds)                        
+                    }); 
+             
+             var dots = svg.selectAll("circle")                            
+                            .data(ds)
+                            .enter()
+                            .append("circle")
+                            .attr({
+                                cx: function(d) {return xScale(getDate(d.year)); },
+                                cy: function (d) {return yScale(d.nonreligpct); },
+                                r:  4,
+                                "fill": "purple",                                
+                                class: "circle"
+                            }) 
+                            .on("mouseover", function(d) {      
+                                tooltip.transition()        
+                                    .duration(500)      
+                                    .style("opacity", .9);      
+                                tooltip.html("<strong>About " + (d.nonreligpct *100).toFixed(2) + "% of atheists on the world in "+d.year+" year.</strong>")  
+                                    .style("left", (d3.event.pageX) + "px")     
+                                    .style("top", (d3.event.pageY - 28) + "px");    
+                            })                  
+                            .on("mouseout", function(d) {       
+                                tooltip.transition()        
+                                    .duration(500)      
+                                    .style("opacity", 0);   
+                            });
+        }
+        
+       
+           
+         function spliceData(data,minValue,maxValue){
+             var splicedData = []
+             for(var i=0;i<data.length;i++){
+                 if(data[i].year >= minValue && data[i].year <= maxValue){
+                     splicedData.push(data[i]);
+                 }
+             }
+             return splicedData;
+         }  
+          
+        function createSlider(minDate,maxDate,ds){
+                var divSlider = document.createElement("div")
+                divSlider.setAttribute("id","slider")
+                divSlider.setAttribute("width",width)
+                d3.select("#wrapper").append("text").text("Change the date range")
+                var divWrapper = document.getElementById("wrapper")
+                divWrapper.appendChild(divSlider)
+                range = [minDate.getFullYear(),maxDate.getFullYear()]
+                d3.select('#slider').call(d3.slider().axis(true).min(range[0]).max(range[1]).value(range).step(5).on("slide", function(evt, value) {
+                minDate =  getDate(value[0])
+                maxDate =  getDate(value[1])
+                var data = spliceData(ds,value[0],value[1])
+                updateLine(minDate,maxDate,data)
+                 
+        })) 
+        }
+        
+        function getDate(d){
+            var strDate = new String(d+"0101");
+            var year = strDate.substr(0,4);
+            var month = strDate.substr(4,2)-1; //zero based index
+            var day = strDate.substr(6,2);
+            return new Date(year, month, day);
+        }
+
+        d3.csv("WRP_global.csv", function(error, ds) {
+                
+                if (error) {  
+                    console.log(error);  
+                } else {      
+                    console.log(ds);  
+                    for(var i =0;i<ds.length;i++){
+                        console.log("Year: "+ds[i].year);
+                        console.log("Atheists %: "+String(Math.round(ds[i].nonreligpct*100))+"%");
+                    }
+
+                    minDate = getMinDate(ds);
+                    maxDate = getMaxDate(ds);
+                    buildLine(minDate,maxDate,ds);
+                    createSlider(minDate,maxDate,ds);
+                 
+                }    
+            });
+        
+        
+            
+    
+               
+    </script>
+    </div>
+    </body>
+</html>

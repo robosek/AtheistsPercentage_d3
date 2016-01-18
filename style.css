@@ -1,0 +1,43 @@
+.axis path,
+            .x-axis path, .y-axis path,
+            .x-axis line, .y-axis line  {
+                fill: none;
+                stroke: black;
+                shape-rendering: crispEdges;
+            }
+            
+            .x-axis, .y-axis text {
+                font-family: sans-serif;
+                font-size: 10px;
+            }
+            
+            div.tooltip {   
+                    position: absolute;
+                    max-width: 200px;
+                    height: auto;
+                    padding: 5px;
+                    background-color:white;
+                    -webkit-border-radius: 5px;
+                    -moz-border-radius: 5px;
+                    border-radius: 5px;
+                    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+                    pointer-events: none; 
+                    font-family: sans-serif;
+                    font-size:12px;
+                    
+
+            }
+            body{
+                text-align:center;
+            }
+            #wrapper {
+      width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #wrapper > div {
+      margin: 35px 0;
+      
+    }
